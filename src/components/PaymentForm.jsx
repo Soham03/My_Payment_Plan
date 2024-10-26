@@ -122,7 +122,7 @@ const PaymentForm = () => {
             <input
               type="number"
               value={preAgPercentage}
-              onChange={(e) => setPreAgPercentage(e.target.value / 100)}
+              onChange={(e) => setPreAgPercentage(e.target.value)}
             />
           </div>
           <div className="my-2 mx-2 d-flex justify-content-start">
