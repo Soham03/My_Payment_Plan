@@ -20,7 +20,8 @@ const PaymentForm = () => {
   const [fixedInstallment, setFixedInstallment] = useState(1321200);
   const [fixedInstallment2, setFixedInstallment2] = useState(660600);
   const [fixedInstallment3, setFixedInstallment3] = useState(440400);
-  const [advanceAmount,setAdvanceAmount]=useState(221000)
+  const [advanceAmount, setAdvanceAmount] = useState(221000);
+  const [gstAdvancePayment, setGstAdvancePayment] = useState(0);
 
   const [decPayment, setDecPayment] = useState(0);
 
@@ -55,21 +56,36 @@ const PaymentForm = () => {
     let novPaymentAmount =
       parseInt(pagamount) +
       parseInt(sdv) +
-      parseInt(preaggst) +
       parseInt(tdsamountcal) +
       parseInt(totalCash);
     setNovPayment(novPaymentAmount);
 
-    let almostPay = parseInt(fixedInstallment*4)+parseInt(fixedInstallment2)+parseInt(fixedInstallment3)+parseInt(novPaymentAmount)+parseInt(advanceAmount);
-    let decPay=parseInt(totalValue)-parseInt(almostPay)
-    setDecPayment(decPay)
+    let almostPay =
+      parseInt(fixedInstallment * 4) +
+      parseInt(fixedInstallment2) +
+      parseInt(fixedInstallment3) +
+      parseInt(novPaymentAmount) +
+      parseInt(advanceAmount);
+    let decPay = parseInt(totalValue) - parseInt(almostPay);
+
+    setDecPayment(decPay);
+
+    setGstAdvancePayment(advanceAmount * 0.05);
   };
 
   for (let i = 0; i < 4; i++) {
     trs.push(
       <tr>
-        <td className="border border-right-1">{i +2} Installment</td>
-        <td>{fixedInstallment}</td>
+        <td className="border border-right-1">{i + 2} Installment</td>
+        <td className="border border-right-1">
+          {fixedInstallment}
+        </td>
+        <td className="border border-right-1">
+        {fixedInstallment * 0.05}
+        </td>
+        <td className="border border-right-1">
+        {fixedInstallment+fixedInstallment * 0.05}
+        </td>
       </tr>
     );
   }
@@ -153,68 +169,107 @@ const PaymentForm = () => {
               <tr>
                 <th className="border border-right-1">Item</th>
                 <th>Value</th>
+                <th>Gst</th>
+                <th>Total</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td className="border border-right-1">Agreement Value</td>
                 <td>{agreementValue}</td>
+                <td className="border border-right-1">{totalGstValue}</td>
+                <td className="border border-right-1"></td>
               </tr>
               <tr>
                 <td className="border border-right-1">Stamp Duty</td>
                 <td>{stampDutyValue}</td>
+                <td className="border border-right-1"></td>
+                <td className="border border-right-1"></td>
               </tr>
-              <tr>
-                <td className="border border-right-1">Tds {tds}%</td>
-                <td>{tdsAmount}</td>
-              </tr>
-              <tr>
-                <td className="border border-right-1">Total GST Value</td>
-                <td>{totalGstValue}</td>
-              </tr>
+          
+      
               <tr>
                 <td className="border border-right-1">Total Value</td>
                 <td>{totalValue}</td>
+                <td className="border border-right-1"></td>
+                <td className="border border-right-1"></td>
               </tr>
+              <tr>
+                <td className="border border-right-1">Tds {tds}% (included)</td>
+                <td>{tdsAmount}</td>
+                <td className="border border-right-1"></td>
+                <td className="border border-right-1"></td>
+              </tr>
+
               <tr>
                 <td className="border border-right-1">
                   Pre Agreement Amount {preAgPercentage} %
                 </td>
+                
                 <td>{preAgAmount}</td>
+                <td className="border border-right-1">{preAgGst}</td>
+                <td className="border border-right-1"></td>
               </tr>
-              <tr>
-                <td className="border border-right-1">
-                  Pre Agreement Amount GST {gstPercentage} %
-                </td>
-                <td>{preAgGst}</td>
-              </tr>
+           
+          
               <tr>
                 <td className="border border-right-1">Total Cash Component </td>
-                <td>{totalCashComponent}</td>
+                <td className="border border-right-1">{totalCashComponent}</td>
+                <td className="border border-right-1"></td>
+                <td className="border border-right-1"></td>
+
+              </tr>
+              <tr>
+                <td className="border border-right-1">Advance Amount</td>
+                <td>{advanceAmount}</td>
+                <td className="border border-right-1">{gstAdvancePayment}</td>
+                <td className="border border-right-1">{advanceAmount+gstAdvancePayment}</td>
               </tr>
               <tr>
                 <td className="border border-right-1">
                   <div>
                     <div>Nov Payment (Pre Agreement) </div>(Stamp Duty + Tds +
-                    Pre agreement value+ Gst on Pre Agreement Value+ Cash
+                    Pre agreement value+ Cash
                     Component)<div></div>
                   </div>
                 </td>
                 <td>{novPayment}</td>
+                <td className="border border-right-1">{preAgGst}</td>
+                <td className="border border-right-1">{novPayment+preAgGst}</td>
               </tr>
               <tr>
                 <td className="border border-right-1">December Payment </td>
-                <td>{decPayment}</td>
+                <td>
+                  {decPayment}
+                </td>
+                <td className="border border-right-1">{decPayment * 0.05}</td>
+                <td className="border border-right-1">{decPayment+(decPayment * 0.05)}</td>
               </tr>
 
               {trs}
               <tr>
                 <td className="border border-right-1"> 7 Installment</td>
-                <td>{fixedInstallment2}</td>
+                <td className="border border-right-1">
+                  {fixedInstallment2}
+                </td>
+                <td className="border border-right-1">
+                {fixedInstallment2 * 0.05}
+                </td>
+                <td className="border border-right-1">
+                {fixedInstallment2+fixedInstallment2 * 0.05}
+                </td>
               </tr>
               <tr>
                 <td className="border border-right-1">8 Installment </td>
-                <td>{fixedInstallment3}</td>
+                <td className="border border-right-1">
+                  {fixedInstallment3}
+                </td>
+                <td className="border border-right-1">
+                {fixedInstallment3 * 0.05}
+                </td>
+                <td className="border border-right-1">
+                {fixedInstallment3+(fixedInstallment3 * 0.05)}
+                </td>
               </tr>
             </tbody>
           </table>
