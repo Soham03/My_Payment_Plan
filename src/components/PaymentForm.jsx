@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+import { jsPDF } from "jspdf";
+import autoTable from 'jspdf-autotable'
+
+
 
 const PaymentForm = () => {
   const [readyReckoner, setReadyReckoner] = useState(24000);
@@ -22,6 +26,7 @@ const PaymentForm = () => {
   const [fixedInstallment3, setFixedInstallment3] = useState(440400);
   const [advanceAmount, setAdvanceAmount] = useState(221000);
   const [gstAdvancePayment, setGstAdvancePayment] = useState(0);
+  const [parkPay,setParkPay]=useState(0);
 
   const [decPayment, setDecPayment] = useState(0);
 
@@ -31,7 +36,7 @@ const PaymentForm = () => {
     e.preventDefault();
     // Logic to calculate total value can be added here
     let gstV, sdv, agv, pagamount;
-    agv = parseInt(readyReckoner) * 770 + parseInt(parkingCharges);
+    agv = parseInt(readyReckoner) * 770 + parseInt(parkingCharges)-parseInt(parkPay);
     setAgreementValue(parseInt(agv));
     sdv = parseInt(agv) * 0.06;
     setStampDutyValue(parseInt(sdv));
@@ -41,18 +46,19 @@ const PaymentForm = () => {
     console.log(gstV, sdv);
     setShowTable(true);
 
-    pagamount = parseInt(agv) * (preAgPercentage / 100);
+    pagamount = parseInt(agv)*(preAgPercentage / 100);
     setPreAgAmount(parseInt(pagamount));
 
     let remainingValue = parseInt(26000) - parseInt(readyReckoner);
-    let totalCash = parseInt(remainingValue) * 770;
+    let totalCash = (parseInt(remainingValue) * 770)+parseInt(parkPay);
     setCashComponent(parseInt(totalCash));
 
-    let tdsamountcal = (agv * tds) / 100;
+    let tdsamountcal = agv*(tds/ 100);
     setTdsAmount(tdsamountcal);
 
     let preaggst = parseInt(pagamount)*0.05;
     setPreAgGst(preaggst);
+
     let novPaymentAmount =
       parseInt(pagamount) +
       parseInt(sdv) +
@@ -71,6 +77,32 @@ const PaymentForm = () => {
     setDecPayment(decPay);
 
     setGstAdvancePayment(advanceAmount * 0.05);
+  };
+
+  const handleDownload = () => {
+    const doc = new jsPDF();
+
+    doc.text("Payment Summary", 20, 20);
+    autoTable(doc,{
+      head: [["Item", "Value", "GST", "Total"]],
+      body: [
+        ["Agreement Value", agreementValue, totalGstValue, ""],
+        ["Stamp Duty", stampDutyValue, "", ""],
+        ["Total Value", totalValue, "", ""],
+        [`TDS ${tds}% (included)`, tdsAmount, "", ""],
+        [`Pre Agreement Amount ${preAgPercentage}%`, preAgAmount, preAgGst, ""],
+        ["Total Cash Component", totalCashComponent, "", ""],
+        ["Advance Amount", advanceAmount, gstAdvancePayment, advanceAmount + gstAdvancePayment],
+        ["Nov Payment (Pre Agreement)", novPayment, preAgGst, novPayment + preAgGst],
+        ["December Payment", decPayment, decPayment * 0.05, decPayment + (decPayment * 0.05)],
+        ...trs.map((row, index) => [`${index + 2} Installment`, fixedInstallment, fixedInstallment * 0.05, fixedInstallment + fixedInstallment * 0.05]),
+        ["7 Installment", fixedInstallment2, fixedInstallment2 * 0.05, fixedInstallment2 + (fixedInstallment2 * 0.05)],
+        ["8 Installment", fixedInstallment3, fixedInstallment3 * 0.05, fixedInstallment3 + (fixedInstallment3 * 0.05)],
+      ],
+      startY: 30,
+    });
+
+    doc.save("payment_summary.pdf");
   };
 
   for (let i = 0; i < 4; i++) {
@@ -93,7 +125,7 @@ const PaymentForm = () => {
     <div>
       <div className="d-flex justify-content-center">
         <form className="border  my-5" onSubmit={handleSubmit}>
-          <div className="my-2 mx-2 d-flex justify-content-start">
+          <div className="my-2 mx-2 d-flex justify-content-between">
             <label>Ready Reckoner Number:</label>
             <input
               type="number"
@@ -101,7 +133,7 @@ const PaymentForm = () => {
               onChange={(e) => setReadyReckoner(e.target.value)}
             />
           </div>
-          <div className="my-2 mx-2 d-flex justify-content-start">
+          <div className="my-2 mx-2 d-flex justify-content-between">
             <label>GST Percentage:</label>
             <input
               type="number"
@@ -109,7 +141,7 @@ const PaymentForm = () => {
               onChange={(e) => setGstPercentage(e.target.value)}
             />
           </div>
-          <div className="my-2 mx-2 d-flex justify-content-start">
+          <div className="my-2 mx-2 d-flex justify-content-between">
             <label>Stamp Duty Percentage:</label>
             <input
               type="number"
@@ -117,7 +149,7 @@ const PaymentForm = () => {
               onChange={(e) => setStampDutyPercentage(e.target.value)}
             />
           </div>
-          <div className="my-2 mx-2 d-flex justify-content-start">
+          <div className="my-2 mx-2 d-flex justify-content-between">
             <label>Total Value:</label>
             <input
               type="number"
@@ -125,7 +157,7 @@ const PaymentForm = () => {
               onChange={(e) => setTotalValue(e.target.value)}
             />
           </div>
-          <div className="my-2 mx-2 d-flex justify-content-start">
+          <div className="my-2 mx-2 d-flex justify-content-between">
             <label>Parking Charges:</label>
             <input
               type="number"
@@ -133,7 +165,15 @@ const PaymentForm = () => {
               onChange={(e) => setParkingCharges(e.target.value)}
             />
           </div>
-          <div className="my-2 mx-2 d-flex justify-content-start">
+          <div className="my-2 mx-2 d-flex justify-content-between">
+            <label>Parking Adjustment:</label>
+            <input
+              type="number"
+              value={parkPay}
+              onChange={(e) => setParkPay(e.target.value)}
+            />
+          </div>
+          <div className="my-2 mx-2 d-flex justify-content-between">
             <label>Pre-Agreement percentage:</label>
             <input
               type="number"
@@ -141,7 +181,7 @@ const PaymentForm = () => {
               onChange={(e) => setPreAgPercentage(e.target.value)}
             />
           </div>
-          <div className="my-2 mx-2 d-flex justify-content-start">
+          <div className="my-2 mx-2 d-flex justify-content-between">
             <label>Tds Percentage:</label>
             <input
               type="number"
@@ -149,7 +189,7 @@ const PaymentForm = () => {
               onChange={(e) => setTds(e.target.value)}
             />
           </div>
-          <div className="my-2 mx-2 d-flex justify-content-start">
+          <div className="my-2 mx-2 d-flex justify-content-between">
             <label>Advance Amount:</label>
             <input
               type="number"
@@ -157,7 +197,8 @@ const PaymentForm = () => {
               onChange={(e) => setAdvanceAmount(e.target.value)}
             />
           </div>
-          <button className="my-2" type="submit">
+      
+          <button className="my-2 btn btn-primary" type="submit">
             Calculate
           </button>
         </form>
@@ -168,9 +209,9 @@ const PaymentForm = () => {
             <thead>
               <tr>
                 <th className="border border-right-1">Item</th>
-                <th>Value</th>
-                <th>Gst</th>
-                <th>Total</th>
+                <th className="border border-right-1">Value</th>
+                <th className="border border-right-1">Gst</th>
+                <th className="border border-right-1">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -274,6 +315,9 @@ const PaymentForm = () => {
             </tbody>
           </table>
         )}
+      </div>
+      <div>
+        <button className="btn btn-danger" onClick={handleDownload}>Download</button>
       </div>
     </div>
   );
